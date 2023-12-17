@@ -4,7 +4,10 @@ import GUI from 'lil-gui';
 
 // Debug
 const gui = new GUI();
-const debugObject = {};
+const debugObject = {
+  rotateTorus: true,
+  rotateTorus2: true,
+};
 
 
 // Cursor info
@@ -25,17 +28,19 @@ const canvas = document.querySelector("canvas.webgl");
 const scene = new THREE.Scene()
 
 // Object
-debugObject.color = 0xff0000;
+debugObject.color = 0x311717;
 
-const geometry = new THREE.BoxGeometry(1, 1, 1)
+// Cube
+const geometry = new THREE.BoxGeometry(4, 0.01, 4)
 const material = new THREE.MeshBasicMaterial({ color: debugObject.color })
 const mesh = new THREE.Mesh(geometry, material)
+mesh.position.y = -1.2;
 scene.add(mesh)
 
 const cubeTweak = gui.addFolder('Cube');
 
 cubeTweak.add(mesh.position, 'y').min(-3).max(3).step(0.01).name('elevation')
-cubeTweak.add(mesh, 'visible');
+cubeTweak.add(mesh, 'visible').setValue(false).name('visible');
 cubeTweak.add(material, 'wireframe');
 cubeTweak.addColor(debugObject, 'color').onChange(() => {
   material.color.set(debugObject.color);
@@ -60,17 +65,49 @@ debugObject.spin = () => {
   controls.autoRotate = !controls.autoRotate;
 }
 cubeTweak.add(debugObject, 'spin');
-// const mesh = new THREE.Mesh(
-//   new THREE.TorusGeometry(0.5, 0.2, 16, 32),
-//   new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
-// );
-// scene.add(mesh);
 
-// const otherTorus = new THREE.Mesh(
-//   new THREE.TorusGeometry(1, 0.2, 16, 32),
-//   new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
-// );
-// scene.add(otherTorus);
+// Torus 1
+debugObject.torusColor = 0xff00ff;
+const torus1Material = new THREE.MeshBasicMaterial({ color: debugObject.torusColor, wireframe: true });
+const torus1 = new THREE.Mesh(
+  new THREE.TorusGeometry(0.5, 0.2, 16, 32),
+  torus1Material
+);
+scene.add(torus1);
+
+const torus1Tweak = gui.addFolder('Torus 1');
+
+torus1Tweak.add(torus1.position, 'y').min(-3).max(3).step(0.01).name('elevation');
+torus1Tweak.add(torus1, 'visible');
+torus1Tweak.add(torus1.material, 'wireframe');
+torus1Tweak.addColor(debugObject, 'torusColor').onChange(() => {
+  torus1Material.color.set(debugObject.torusColor);
+}).name('color');
+debugObject.torus1Spin = () => {
+  debugObject.rotateTorus = !debugObject.rotateTorus;
+};
+torus1Tweak.add(debugObject, 'torus1Spin');
+
+debugObject.torus2Color = 0x00ff00;
+const torus2 = new THREE.Mesh(
+  new THREE.TorusGeometry(1, 0.2, 16, 32),
+  new THREE.MeshBasicMaterial({ color: debugObject.torus2Color, wireframe: true })
+);
+scene.add(torus2);
+
+const torus2Tweak = gui.addFolder('Torus 2');
+
+torus2Tweak.add(torus2.position, 'y').min(-3).max(3).step(0.01).name('elevation');
+torus2Tweak.add(torus2, 'visible');
+torus2Tweak.add(torus2.material, 'wireframe');
+torus2Tweak.addColor(debugObject, 'torus2Color').onChange(() => {
+  torus2.material.color.set(debugObject.torus2Color);
+}).name('color');
+debugObject.torus2Spin = () => {
+  debugObject.rotateTorus2 = !debugObject.rotateTorus2;
+};
+torus2Tweak.add(debugObject, 'torus2Spin');
+
 
 // Sizes
 const sizes = {
@@ -131,8 +168,8 @@ const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height)
 //   -1
 // );
 camera.position.z = 3
-// camera.position.y = 2
-// camera.position.x = 2
+camera.position.y = 2
+camera.position.x = 2
 // camera.rotateX(-0.5)
 scene.add(camera)
 
@@ -149,13 +186,13 @@ renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 // Clock
-// const clock = new THREE.Clock()
+const clock = new THREE.Clock()
 
 const tick = () => {
-  // const elapsedTime = clock.getElapsedTime()
+  const elapsedTime = clock.getElapsedTime()
   // Update objects
-  // mesh.rotation.x = elapsedTime * 2
-  // otherTorus.rotation.y = elapsedTime
+  torus1.rotation.x = debugObject.rotateTorus ? elapsedTime * 2 : 0;
+  torus2.rotation.y = debugObject.rotateTorus2 ? elapsedTime * 2 : 0;
 
   // Update camera
   // camera.position.x = cursor.x * 3;
